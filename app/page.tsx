@@ -1,100 +1,177 @@
-import Image from "next/image";
+import Link from "next/link";
+import { ArrowRight, MessageCircle, GitBranch, BarChart3, CheckCircle2 } from "lucide-react";
 
-export default function Home() {
+export default function LandingPage() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className="min-h-screen flex flex-col items-center">
+      {/* Navigation */}
+      <nav className="w-full max-w-7xl px-6 py-6 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 rounded-lg bg-accent flex items-center justify-center">
+            <MessageCircle className="w-5 h-5 text-text" />
+          </div>
+          <span className="text-xl font-bold tracking-tight">GrowChat</span>
         </div>
+        <div className="flex items-center gap-4">
+          <Link href="/login" className="text-text2 hover:text-text transition-colors font-medium">
+            Log in
+          </Link>
+          <Link
+            href="/signup"
+            className="bg-accent hover:bg-accent/90 text-text px-5 py-2.5 rounded-full font-medium transition-all"
+          >
+            Sign up
+          </Link>
+        </div>
+      </nav>
+
+      <main className="flex-1 w-full max-w-7xl px-6 flex flex-col items-center justify-center">
+        {/* Hero Section */}
+        <section className="py-24 md:py-32 flex flex-col items-center text-center max-w-4xl mx-auto">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-surface2 border border-border mb-8 text-sm text-text2">
+            <span className="w-2 h-2 rounded-full bg-accent3"></span>
+            GrowChat Pro is now in beta
+          </div>
+          <h1 className="text-5xl md:text-7xl font-bold tracking-tight mb-8 leading-tight">
+            Automate Your <span className="text-transparent bg-clip-text bg-gradient-to-r from-accent via-accent2 to-accent3">Instagram Growth</span>
+          </h1>
+          <p className="text-xl text-text2 mb-10 max-w-2xl leading-relaxed">
+            Turn your followers into customers with intelligent DM automation, flow builders, and rich analytics.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center gap-4 w-full justify-center">
+            <Link
+              href="/signup"
+              className="w-full sm:w-auto bg-accent hover:bg-accent/90 text-text px-8 py-4 rounded-full font-medium transition-all flex items-center justify-center gap-2 text-lg"
+            >
+              Get Started Free <ArrowRight className="w-5 h-5" />
+            </Link>
+            <Link
+              href="#pricing"
+              className="w-full sm:w-auto bg-surface2 hover:bg-surface border border-border text-text px-8 py-4 rounded-full font-medium transition-all flex items-center justify-center text-lg"
+            >
+              View Pricing
+            </Link>
+          </div>
+        </section>
+
+        {/* Features Section */}
+        <section className="py-24 w-full">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">Everything you need to scale</h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="bg-surface p-8 rounded-2xl border border-border hover:border-accent/50 transition-colors group">
+              <div className="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center mb-6 group-hover:bg-accent/30 transition-colors">
+                <MessageCircle className="w-6 h-6 text-accent" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">DM Automation</h3>
+              <p className="text-text2 leading-relaxed">
+                Automatically reply to DMs, story mentions, and comments with personalized responses.
+              </p>
+            </div>
+            <div className="bg-surface p-8 rounded-2xl border border-border hover:border-accent2/50 transition-colors group">
+              <div className="w-12 h-12 rounded-xl bg-accent2/20 flex items-center justify-center mb-6 group-hover:bg-accent2/30 transition-colors">
+                <GitBranch className="w-6 h-6 text-accent2" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Flow Builder</h3>
+              <p className="text-text2 leading-relaxed">
+                Design complex conversational paths with our intuitive drag-and-drop visual interface.
+              </p>
+            </div>
+            <div className="bg-surface p-8 rounded-2xl border border-border hover:border-accent3/50 transition-colors group">
+              <div className="w-12 h-12 rounded-xl bg-accent3/20 flex items-center justify-center mb-6 group-hover:bg-accent3/30 transition-colors">
+                <BarChart3 className="w-6 h-6 text-accent3" />
+              </div>
+              <h3 className="text-xl font-semibold mb-3">Analytics</h3>
+              <p className="text-text2 leading-relaxed">
+                Track open rates, click-throughs, and conversions to optimize your messaging strategy.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Pricing Section */}
+        <section id="pricing" className="py-24 w-full">
+          <h2 className="text-3xl md:text-4xl font-bold text-center mb-16">Simple, transparent pricing</h2>
+          <div className="grid md:grid-cols-3 gap-8">
+            {/* Starter */}
+            <div className="bg-surface p-8 rounded-3xl border border-border flex flex-col">
+              <h3 className="text-2xl font-semibold mb-2">Starter</h3>
+              <p className="text-text2 mb-6">Perfect for growing creators</p>
+              <div className="mb-8">
+                <span className="text-5xl font-bold">$29</span>
+                <span className="text-text2">/mo</span>
+              </div>
+              <ul className="space-y-4 mb-8 flex-1">
+                {['1 Instagram Account', 'Up to 5,000 DMs/mo', 'Basic Flow Builder', 'Standard Support'].map((feature) => (
+                  <li key={feature} className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-accent3" />
+                    <span className="text-text2">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+              <Link href="/signup" className="w-full bg-surface2 hover:bg-border text-center py-3 rounded-xl font-medium transition-colors">
+                Start Free Trial
+              </Link>
+            </div>
+            {/* Pro */}
+            <div className="bg-surface2 p-8 rounded-3xl border-2 border-accent flex flex-col relative transform md:-translate-y-4">
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-accent text-white px-4 py-1 rounded-full text-sm font-medium">
+                Most Popular
+              </div>
+              <h3 className="text-2xl font-semibold mb-2">Pro</h3>
+              <p className="text-text2 mb-6">For serious marketers</p>
+              <div className="mb-8">
+                <span className="text-5xl font-bold">$79</span>
+                <span className="text-text2">/mo</span>
+              </div>
+              <ul className="space-y-4 mb-8 flex-1">
+                {['3 Instagram Accounts', 'Up to 25,000 DMs/mo', 'Advanced Flow Builder', 'Analytics Dashboard', 'Priority Support'].map((feature) => (
+                  <li key={feature} className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-accent" />
+                    <span className="text-text2">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+              <Link href="/signup" className="w-full bg-accent hover:bg-accent/90 text-center py-3 rounded-xl font-medium transition-colors shadow-lg shadow-accent/25">
+                Get Started
+              </Link>
+            </div>
+            {/* Agency */}
+            <div className="bg-surface p-8 rounded-3xl border border-border flex flex-col">
+              <h3 className="text-2xl font-semibold mb-2">Agency</h3>
+              <p className="text-text2 mb-6">For teams and agencies</p>
+              <div className="mb-8">
+                <span className="text-5xl font-bold">$199</span>
+                <span className="text-text2">/mo</span>
+              </div>
+              <ul className="space-y-4 mb-8 flex-1">
+                {['Unlimited Accounts', 'Unlimited DMs', 'Custom Integrations', 'White-label Reports', '24/7 Phone Support'].map((feature) => (
+                  <li key={feature} className="flex items-center gap-3">
+                    <CheckCircle2 className="w-5 h-5 text-accent2" />
+                    <span className="text-text2">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+              <Link href="/signup" className="w-full bg-surface2 hover:bg-border text-center py-3 rounded-xl font-medium transition-colors">
+                Contact Sales
+              </Link>
+            </div>
+          </div>
+        </section>
       </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
+
+      {/* Footer */}
+      <footer className="w-full border-t border-border py-12 mt-12 bg-surface">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-6">
+          <div className="flex items-center gap-2">
+            <MessageCircle className="w-5 h-5 text-accent" />
+            <span className="font-semibold">GrowChat</span>
+          </div>
+          <p className="text-text2 text-sm">© 2026 GrowChat Pro. All rights reserved.</p>
+          <div className="flex gap-6 text-sm font-medium text-text2">
+            <Link href="#" className="hover:text-text transition-colors">Terms</Link>
+            <Link href="#" className="hover:text-text transition-colors">Privacy</Link>
+          </div>
+        </div>
       </footer>
     </div>
   );
