@@ -13,13 +13,15 @@ export async function GET() {
         )
     }
 
-    // Use Facebook Login for Business endpoint (required for apps using
-    // "Instagram API with Instagram Login" use case)
+    // Facebook Login for Business requires FB Graph API permission names
+    // (not instagram_business_* which are for Instagram Login endpoint)
     const scope = [
-        'instagram_business_basic',
-        'instagram_business_manage_messages',
-        'instagram_business_manage_comments',
-        'instagram_business_content_publish',
+        'pages_show_list',
+        'pages_manage_metadata',
+        'pages_read_engagement',
+        'instagram_basic',
+        'instagram_manage_messages',
+        'instagram_manage_comments',
     ].join(',')
 
     const authUrl =
