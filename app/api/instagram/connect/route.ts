@@ -13,6 +13,8 @@ export async function GET() {
         )
     }
 
+    // Use Facebook Login for Business endpoint (required for apps using
+    // "Instagram API with Instagram Login" use case)
     const scope = [
         'instagram_business_basic',
         'instagram_business_manage_messages',
@@ -21,15 +23,13 @@ export async function GET() {
     ].join(',')
 
     const authUrl =
-        `https://www.instagram.com/oauth/authorize` +
+        `https://www.facebook.com/v21.0/dialog/oauth` +
         `?client_id=${appId}` +
         `&redirect_uri=${encodeURIComponent(redirectUri)}` +
         `&scope=${scope}` +
-        `&response_type=code` +
-        `&enable_fb_login=0` +
-        `&force_authentication=1`
+        `&response_type=code`
 
-    console.log('Redirecting to Instagram OAuth:', authUrl)
+    console.log('Redirecting to Facebook/Instagram OAuth:', authUrl)
 
     return NextResponse.redirect(authUrl)
 }
