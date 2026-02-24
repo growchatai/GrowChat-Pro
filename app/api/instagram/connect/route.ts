@@ -13,25 +13,25 @@ export async function GET() {
         )
     }
 
-    // Facebook Login for Business requires FB Graph API permission names
-    // (not instagram_business_* which are for Instagram Login endpoint)
+    // Instagram API with Instagram Login — use Instagram's own OAuth endpoint
+    // with enable_fb_login=1 to allow Facebook Login for Business flow  
     const scope = [
-        'pages_show_list',
-        'pages_manage_metadata',
-        'pages_read_engagement',
-        'instagram_basic',
-        'instagram_manage_messages',
-        'instagram_manage_comments',
+        'instagram_business_basic',
+        'instagram_business_manage_messages',
+        'instagram_business_manage_comments',
+        'instagram_business_content_publish',
     ].join(',')
 
     const authUrl =
-        `https://www.facebook.com/v21.0/dialog/oauth` +
-        `?client_id=${appId}` +
+        `https://www.instagram.com/oauth/authorize` +
+        `?enable_fb_login=1` +
+        `&force_authentication=0` +
+        `&client_id=${appId}` +
         `&redirect_uri=${encodeURIComponent(redirectUri)}` +
         `&scope=${scope}` +
         `&response_type=code`
 
-    console.log('Redirecting to Facebook/Instagram OAuth:', authUrl)
+    console.log('Redirecting to Instagram OAuth:', authUrl)
 
     return NextResponse.redirect(authUrl)
 }
