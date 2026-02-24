@@ -1,12 +1,12 @@
-import express from 'express'
 import dotenv from 'dotenv'
+dotenv.config()
+
+import express from 'express'
 import { handleVerification, handleWebhook } from './webhook'
 import { Worker } from 'bullmq'
 import { redis } from './queue'
 import { executeNode } from './executor'
 import { logger } from './logger'
-
-dotenv.config()
 
 const app = express()
 const PORT = process.env.WORKER_PORT || 3001

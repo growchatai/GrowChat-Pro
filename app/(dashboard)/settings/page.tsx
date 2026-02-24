@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
 import { usePlanLimits } from "@/hooks/usePlanLimits";
 import {
@@ -136,14 +137,7 @@ export default function SettingsPage() {
 
             {/* Content areas */}
             {activeTab === 'instagram' && (
-                <div className="flex-1 flex flex-col pt-10 items-center justify-center border border-dashed border-border rounded-2xl bg-surface2/50 shrink-0 h-64">
-                    <Instagram className="w-12 h-12 text-text2 mb-4" />
-                    <h2 className="text-xl font-bold mb-2">Instagram Connections</h2>
-                    <p className="text-text2 mb-6">Connect your professional Instagram pages.</p>
-                    <button className="px-6 py-2.5 bg-accent hover:bg-accent2 text-white font-medium rounded-xl transition-colors">
-                        Connect Account
-                    </button>
-                </div>
+                <InstagramTab supabase={supabase} workspaceId={workspaceId} />
             )}
 
             {activeTab === 'team' && (
@@ -242,16 +236,16 @@ export default function SettingsPage() {
                     <div>
                         <h2 className="text-xl font-bold mb-6">Current Plan</h2>
                         <div className={`p-6 border rounded-2xl relative overflow-hidden ${limits.plan === 'agency' ? 'border-purple-500/50 bg-purple-500/5' :
-                                limits.plan === 'pro' ? 'border-blue-500/50 bg-blue-500/5' :
-                                    'border-border bg-surface'
+                            limits.plan === 'pro' ? 'border-blue-500/50 bg-blue-500/5' :
+                                'border-border bg-surface'
                             }`}>
                             <div className="absolute top-0 right-0 p-4 opacity-10">
                                 {limits.plan === 'agency' ? <Building2 className="w-24 h-24" /> : <Zap className="w-24 h-24" />}
                             </div>
 
                             <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-4 ${limits.plan === 'agency' ? 'bg-purple-500 text-white' :
-                                    limits.plan === 'pro' ? 'bg-blue-500 text-white' :
-                                        'bg-surface3 text-text2'
+                                limits.plan === 'pro' ? 'bg-blue-500 text-white' :
+                                    'bg-surface3 text-text2'
                                 }`}>
                                 {limits.plan === 'agency' ? 'Agency Plan' : limits.plan === 'pro' ? 'Pro Plan' : 'Starter Plan'}
                             </span>
@@ -327,6 +321,125 @@ export default function SettingsPage() {
                     </div>
                 </div>
             )}
+        </div>
+    );
+}
+
+// ─── Instagram Tab Component ───────────────────────────────────────
+function InstagramTab({ supabase, workspaceId }: { supabase: any; workspaceId: string | null }) {
+    const searchParams = useSearchParams();
+    const [accounts, setAccounts] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [connecting, setConnecting] = useState(false);
+
+    const fetchAccounts = useCallback(async () => {
+        setLoading(true);
+        const { data } = await supabase
+            .from('instagram_accounts')
+            .select('*')
+            .order('created_at', { ascending: false });
+        setAccounts(data || []);
+        setLoading(false);
+    }, [supabase]);
+
+    useEffect(() => {
+        fetchAccounts();
+    }, [fetchAccounts]);
+
+    // Handle success/error from OAuth callback
+    useEffect(() => {
+        const success = searchParams.get('success');
+        const error = searchParams.get('error');
+        const username = searchParams.get('username');
+
+        if (success === 'connected' && username) {
+            toast.success(`Instagram account @${username} connected successfully! 🎉`);
+            fetchAccounts();
+        } else if (error) {
+            toast.error(`Instagram connection failed: ${error}`);
+        }
+    }, [searchParams, fetchAccounts]);
+
+    const handleConnect = () => {
+        setConnecting(true);
+        window.location.href = '/api/instagram/connect';
+    };
+
+    const handleDisconnect = async (accountId: string) => {
+        if (!confirm('Are you sure you want to disconnect this account?')) return;
+        const { error } = await supabase
+            .from('instagram_accounts')
+            .delete()
+            .eq('id', accountId);
+        if (error) {
+            toast.error('Failed to disconnect account');
+        } else {
+            toast.success('Account disconnected');
+            fetchAccounts();
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="flex-1 flex items-center justify-center border border-dashed border-border rounded-2xl bg-surface2/50 h-64">
+                <p className="text-text2">Loading Instagram accounts...</p>
+            </div>
+        );
+    }
+
+    return (
+        <div className="space-y-6">
+            {/* Connected accounts */}
+            {accounts.length > 0 && (
+                <div className="border border-border rounded-2xl overflow-hidden bg-surface">
+                    <div className="p-4 bg-surface2 border-b border-border">
+                        <h3 className="font-semibold text-text">Connected Accounts</h3>
+                    </div>
+                    {accounts.map((account) => (
+                        <div key={account.id} className="p-4 flex items-center justify-between border-b border-border last:border-0 hover:bg-surface2/30 transition-colors">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-purple-500 via-pink-500 to-orange-400 flex items-center justify-center text-white font-bold text-lg">
+                                    {account.username?.charAt(0)?.toUpperCase() || 'I'}
+                                </div>
+                                <div>
+                                    <div className="font-semibold text-text">@{account.username}</div>
+                                    <div className="text-sm text-text2">{account.full_name || account.account_type}</div>
+                                    <div className="flex items-center gap-2 mt-1">
+                                        <span className={`w-2 h-2 rounded-full ${account.is_active ? 'bg-green-500' : 'bg-red-500'}`} />
+                                        <span className="text-xs text-text2">{account.is_active ? 'Active' : 'Inactive'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => handleDisconnect(account.id)}
+                                className="px-4 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-colors"
+                            >
+                                <X className="w-4 h-4" />
+                            </button>
+                        </div>
+                    ))}
+                </div>
+            )}
+
+            {/* Connect new account */}
+            <div className="flex-1 flex flex-col pt-10 items-center justify-center border border-dashed border-border rounded-2xl bg-surface2/50 shrink-0 h-64">
+                <Instagram className="w-12 h-12 text-text2 mb-4" />
+                <h2 className="text-xl font-bold mb-2">
+                    {accounts.length > 0 ? 'Add Another Account' : 'Instagram Connections'}
+                </h2>
+                <p className="text-text2 mb-6">Connect your professional Instagram pages.</p>
+                <button
+                    onClick={handleConnect}
+                    disabled={connecting}
+                    className="px-6 py-2.5 bg-accent hover:bg-accent2 text-white font-medium rounded-xl transition-colors disabled:opacity-50 flex items-center gap-2"
+                >
+                    {connecting ? (
+                        <span>Connecting...</span>
+                    ) : (
+                        <><Instagram className="w-4 h-4" /> Connect Instagram Account</>
+                    )}
+                </button>
+            </div>
         </div>
     );
 }
