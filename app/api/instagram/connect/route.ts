@@ -2,36 +2,45 @@ import { NextResponse } from 'next/server'
 
 export async function GET() {
     const appId = process.env.INSTAGRAM_APP_ID
-    const redirectUri = process.env.INSTAGRAM_REDIRECT_URI ||
-        `${process.env.NEXT_PUBLIC_APP_URL || 'https://growchat-app-production-fbcd.up.railway.app'}/api/instagram/callback`
+    const redirectUri = process.env.INSTAGRAM_REDIRECT_URI
+
+    console.log('Instagram connect called:', {
+        appId: appId ? 'SET' : 'MISSING',
+        redirectUri
+    })
 
     if (!appId) {
-        console.error('INSTAGRAM_APP_ID not configured')
         return NextResponse.json(
-            { error: 'Instagram App ID not configured. Please add INSTAGRAM_APP_ID to environment variables.' },
+            { error: 'INSTAGRAM_APP_ID environment variable is not set' },
             { status: 500 }
         )
     }
 
-    // Instagram API with Instagram Login — use Instagram's own OAuth endpoint
-    // with enable_fb_login=1 to allow Facebook Login for Business flow  
+    if (!redirectUri) {
+        return NextResponse.json(
+            { error: 'INSTAGRAM_REDIRECT_URI environment variable is not set' },
+            { status: 500 }
+        )
+    }
+
+    // CORRECT: Instagram Login API scopes
+    // NOT Facebook Login API scopes
     const scope = [
         'instagram_business_basic',
         'instagram_business_manage_messages',
         'instagram_business_manage_comments',
-        'instagram_business_content_publish',
+        'instagram_business_content_publish'
     ].join(',')
 
+    // CORRECT: api.instagram.com NOT facebook.com
     const authUrl =
-        `https://www.instagram.com/oauth/authorize` +
-        `?enable_fb_login=1` +
-        `&force_authentication=0` +
-        `&client_id=${appId}` +
+        `https://api.instagram.com/oauth/authorize` +
+        `?client_id=${appId}` +
         `&redirect_uri=${encodeURIComponent(redirectUri)}` +
         `&scope=${scope}` +
         `&response_type=code`
 
-    console.log('Redirecting to Instagram OAuth:', authUrl)
+    console.log('Redirecting to Instagram OAuth URL:', authUrl)
 
     return NextResponse.redirect(authUrl)
 }

@@ -33,69 +33,71 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-        const appId = process.env.INSTAGRAM_APP_ID!
-        const appSecret = process.env.INSTAGRAM_APP_SECRET!
-        const redirectUri = process.env.INSTAGRAM_REDIRECT_URI ||
-            `${appUrl}/api/instagram/callback`
-
-        // Step 1: Exchange code for short-lived token via Instagram API
-        console.log('Exchanging code for short-lived token...')
-        const tokenResponse = await fetch('https://api.instagram.com/oauth/access_token', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: new URLSearchParams({
-                client_id: appId,
-                client_secret: appSecret,
-                grant_type: 'authorization_code',
-                redirect_uri: redirectUri,
-                code: code,
-            }),
-        })
+        // STEP 1: Exchange code for short-lived token
+        // Instagram Login API uses POST to api.instagram.com
+        const tokenResponse = await fetch(
+            'https://api.instagram.com/oauth/access_token',
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    client_id: process.env.INSTAGRAM_APP_ID!,
+                    client_secret: process.env.INSTAGRAM_APP_SECRET!,
+                    grant_type: 'authorization_code',
+                    redirect_uri: process.env.INSTAGRAM_REDIRECT_URI!,
+                    code: code,
+                }).toString(),
+            }
+        )
 
         const tokenData = await tokenResponse.json()
-        console.log('Token response status:', tokenResponse.status, JSON.stringify(tokenData))
+        console.log('Token exchange response:', tokenData)
 
-        if (tokenData.error_type || tokenData.error_message) {
-            console.error('Token exchange failed:', tokenData)
-            return NextResponse.redirect(`${appUrl}/settings?error=${encodeURIComponent(tokenData.error_message || 'token_exchange_failed')}`)
+        if (!tokenData.access_token) {
+            console.error('No access token received:', tokenData)
+            return NextResponse.redirect(`${appUrl}/settings?error=token_failed`)
         }
 
-        const { access_token: shortLivedToken, user_id: igUserId } = tokenData
-        console.log('Got short-lived token for IG user:', igUserId)
-
-        // Step 2: Exchange short-lived for long-lived token
-        console.log('Exchanging for long-lived token...')
-        const longLivedResponse = await fetch(
+        // STEP 2: Exchange for long-lived token (60 days)
+        // Uses graph.instagram.com for long-lived token
+        const longTokenResponse = await fetch(
             `https://graph.instagram.com/access_token` +
             `?grant_type=ig_exchange_token` +
-            `&client_secret=${appSecret}` +
-            `&access_token=${shortLivedToken}`
+            `&client_secret=${process.env.INSTAGRAM_APP_SECRET}` +
+            `&access_token=${tokenData.access_token}`
         )
-        const longLivedData = await longLivedResponse.json()
-        console.log('Long-lived token response:', longLivedResponse.status)
 
-        const accessToken = longLivedData.access_token || shortLivedToken
-        const expiresIn = longLivedData.expires_in || 3600
+        const longTokenData = await longTokenResponse.json()
+        console.log('Long-lived token response:', longTokenData)
 
-        // Step 3: Get user profile
-        console.log('Fetching user profile...')
+        const accessToken = longTokenData.access_token || tokenData.access_token
+        const expiresIn = longTokenData.expires_in || 5183944
+
+        // STEP 3: Get Instagram profile
+        // Uses graph.instagram.com for all data after auth
         const profileResponse = await fetch(
-            `https://graph.instagram.com/v21.0/me?fields=user_id,username,name,profile_picture_url,account_type&access_token=${accessToken}`
+            `https://graph.instagram.com/v21.0/me` +
+            `?fields=user_id,username,name,profile_picture_url,account_type` +
+            `&access_token=${accessToken}`
         )
+
         const profileData = await profileResponse.json()
-        console.log('Profile data:', JSON.stringify(profileData))
+        console.log('Profile data:', profileData)
 
         if (profileData.error) {
             console.error('Profile fetch failed:', profileData.error)
             return NextResponse.redirect(`${appUrl}/settings?error=${encodeURIComponent(profileData.error.message || 'profile_fetch_failed')}`)
         }
 
+        const igUserId = profileData.user_id || profileData.id || tokenData.user_id
         const username = profileData.username || `user_${igUserId}`
         const fullName = profileData.name || username
         const profilePic = profileData.profile_picture_url || null
         const accountType = profileData.account_type || 'BUSINESS'
 
-        // Step 4: Find workspace
+        // STEP 4: Find workspace
         const { data: workspaces } = await supabase
             .from('workspaces')
             .select('id')
@@ -113,7 +115,7 @@ export async function GET(request: NextRequest) {
             workspaceId = newWorkspace!.id
         }
 
-        // Step 5: Upsert Instagram account
+        // STEP 5: Upsert Instagram account
         console.log('Saving Instagram account to database...')
         const { data: igAccount, error: upsertError } = await supabase
             .from('instagram_accounts')
