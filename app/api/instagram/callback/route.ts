@@ -97,22 +97,31 @@ export async function GET(request: NextRequest) {
         const profilePic = profileData.profile_picture_url || null
         const accountType = profileData.account_type || 'BUSINESS'
 
-        // STEP 4: Find workspace
-        const { data: workspaces } = await supabase
+        // STEP 4: Find workspace — prefer "GrowChat Official", fallback to first
+        const { data: namedWorkspace } = await supabase
             .from('workspaces')
             .select('id')
-            .limit(1)
+            .eq('name', 'GrowChat Official')
+            .single()
 
         let workspaceId: string
-        if (workspaces && workspaces.length > 0) {
-            workspaceId = workspaces[0].id
+        if (namedWorkspace) {
+            workspaceId = namedWorkspace.id
         } else {
-            const { data: newWorkspace } = await supabase
+            const { data: workspaces } = await supabase
                 .from('workspaces')
-                .insert({ name: 'Default Workspace' })
                 .select('id')
-                .single()
-            workspaceId = newWorkspace!.id
+                .limit(1)
+            if (workspaces && workspaces.length > 0) {
+                workspaceId = workspaces[0].id
+            } else {
+                const { data: newWorkspace } = await supabase
+                    .from('workspaces')
+                    .insert({ name: 'GrowChat Official' })
+                    .select('id')
+                    .single()
+                workspaceId = newWorkspace!.id
+            }
         }
 
         // STEP 5: Upsert Instagram account
