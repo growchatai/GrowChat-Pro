@@ -124,7 +124,7 @@ export async function GET(request: NextRequest) {
                 ig_user_id: String(igUserId),
                 username: username,
                 full_name: fullName,
-                profile_picture_url: profilePic,
+                profile_pic_url: profilePic,
                 access_token: accessToken,
                 token_expires_at: new Date(Date.now() + expiresIn * 1000).toISOString(),
                 is_active: true,
